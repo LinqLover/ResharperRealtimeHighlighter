@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <IsPackable>True</IsPackable>
+    <DefineConstants>$(DefineConstants);RESHARPER</DefineConstants>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.ReSharper.SDK" Version="$(SdkVersion)" PrivateAssets="all" />
+    <PackageReference Include="LibGit2Sharp" Version="0.30.0" />
+    <PackageReference Include="Wave" Version="$(WaveVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\..\dependencies.json" PackagePath="" Pack="true" Visible="false" />
+    <Content Include="bin\$(AssemblyName)\$(Configuration)\$(AssemblyName).dll" PackagePath="dotFiles" Pack="true" Visible="false" />
+    <Content Include="bin\$(AssemblyName)\$(Configuration)\$(AssemblyName).pdb" PackagePath="dotFiles" Pack="true" Visible="false" />
+
+    <!-- TODO: add additional assemblies -->
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <NativeDlls Include="$(OutputPath)lib\win32\x64\git2-a418d9d.dll" />
+      <NativeDlls Include="$(OutputPath)lib\win32\x86\git2-a418d9d.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
