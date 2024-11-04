@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Application.Settings;
+using JetBrains.Application.Threading;
 using JetBrains.Collections;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
+using JetBrains.Threading;
 using JetBrains.Util;
 using LibGit2Sharp;
 using ReSharperPlugin.ResharperRealtimeHighlighter.Git;
@@ -19,11 +22,12 @@ namespace ReSharperPlugin.ResharperRealtimeHighlighter;
 [SolutionComponent]
 public class RecentChangesTracker : IDisposable
 {
-	public RecentChangesTracker(Lifetime lifetime, ISolution solution, ISettingsStore settingsStore)
+	public RecentChangesTracker(Lifetime lifetime, ISolution solution, IThreading threading, ISettingsStore settingsStore)
 	{
 		Lifetime = lifetime;
 		Solution = solution;
-		
+		Threading = threading;
+
 		NumberOfCommits = settingsStore.BindToContextLive(Lifetime, ContextRange.ApplicationWide)
 			.GetValueProperty(Lifetime, (Settings settingsKey) => settingsKey.NumberOfCommits)
 			.Value;
@@ -53,6 +57,7 @@ public class RecentChangesTracker : IDisposable
 
 	protected ISolution Solution { get; set; }
 
+	protected IThreading Threading { get; }
 
 	protected int NumberOfCommits { get; private set; }
 
@@ -60,7 +65,7 @@ public class RecentChangesTracker : IDisposable
 
 	protected RepositoryWatcher RepositoryWatcher { get; private set; }
 
-	protected Dictionary<string, Commit> RecentChanges = new();
+	protected ConcurrentDictionary<string, Commit> RecentChanges = new();
 
 	public void UpdateChanges(bool isCached = false)
 	{
@@ -99,7 +104,7 @@ public class RecentChangesTracker : IDisposable
 	{
 		RecentChanges = ReadRecentChanges(Repository, isCached);
 
-		Changed?.Invoke(this, EventArgs.Empty); // TODO: do on main thread?
+		Threading.Dispatcher.Invoke(Lifetime, "UpdateChanges", () => Changed?.Invoke(this, EventArgs.Empty));
 	}
 
 	/// <summary>
@@ -107,9 +112,9 @@ public class RecentChangesTracker : IDisposable
 	/// </summary>
 	/// <param name="repository">The git repository to read changes from.</param>
 	/// <param name="isCached">Indicates whether all commits to consider are already read into RecentChanges.</param>
-	protected Dictionary<string, Commit> ReadRecentChanges(Repository repository, bool isCached = false)
+	protected ConcurrentDictionary<string, Commit> ReadRecentChanges(Repository repository, bool isCached = false)
 	{
-		var recentChanges = new Dictionary<string, Commit>();
+		var recentChanges = new ConcurrentDictionary<string, Commit>();
 		
 		var commits = repository.Commits.Take(NumberOfCommits);
 
