@@ -21,7 +21,6 @@ namespace ReSharperPlugin.ResharperRealtimeHighlighter.Inspection;
 	OverloadResolvePriority = 0)]
 public class RecentChangeHighlighting : IHighlighting
 {
-	// TODO: default constructor
 	public RecentChangeHighlighting(IFile file, Commit commit)
 	{
 		File = file;
@@ -30,8 +29,6 @@ public class RecentChangeHighlighting : IHighlighting
 
 	public const string SeverityId = "RecentChangeInspection";
 
-	public const string Message = "Recently changed file";
-	// TODO: humanify
 	public const string Description = $"ReSharper SDK: {nameof(RecentChangeHighlighting)}.{nameof(Description)}";
 
 	public const int PrefixLength = 5;

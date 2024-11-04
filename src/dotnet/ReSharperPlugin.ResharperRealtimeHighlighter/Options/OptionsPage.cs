@@ -20,7 +20,7 @@ public class OptionsPage : BeSimpleOptionsPage
 		OptionsPageContext optionsPageContext,
 		OptionsSettingsSmartContext optionsSettingsSmartContext,
 		IconHostBase iconHost,
-		ICommonFileDialogs dialogs) // TODO; remove params=
+		ICommonFileDialogs dialogs)
 		: base(lifetime, optionsPageContext, optionsSettingsSmartContext)
 	{
 		AddText("This plugin highlights recent changes in your solution.");
