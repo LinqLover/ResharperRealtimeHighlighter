@@ -1,4 +1,6 @@
-# ResharperRealtimeHighlighter for Rider and ReSharper
+# ResharperRealtimeHighlighter
+
+A simple ReSharper extension that highlights all files that were changed in the most recent git commits. Changed files are updated automatically and efficiently in the background. The number of commits to track can be configured in the ReSharper Options under Tools > ResharperRealtimeHighlighter.
 
 ## Installation
 
